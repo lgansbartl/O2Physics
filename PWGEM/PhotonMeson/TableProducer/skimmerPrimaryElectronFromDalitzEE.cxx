@@ -16,11 +16,11 @@
 #include "PWGEM/Dilepton/Utils/PairUtilities.h"
 #include "PWGEM/PhotonMeson/DataModel/gammaTables.h"
 
+#include "Common/DataModel/CollisionAssociationTables.h"
 #include "Common/DataModel/EventSelection.h"
 #include "Common/DataModel/PIDResponseTOF.h"
 #include "Common/DataModel/PIDResponseTPC.h"
 #include "Common/DataModel/TrackSelectionTables.h"
-#include "Common/DataModel/CollisionAssociationTables.h"
 
 #include <CCDB/BasicCCDBManager.h>
 #include <CommonConstants/MathConstants.h>
@@ -61,9 +61,9 @@ using MyCollisions = soa::Join<aod::Collisions, aod::EvSels, aod::EMEvSels>;
 using MyCollisionsWithSWT = soa::Join<MyCollisions, aod::EMSWTriggerBitsTMP>;
 
 using MyCollisionsMC = soa::Join<MyCollisions, aod::McCollisionLabels>;
-using MyTracks = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksDCA, aod::TracksCov, 
+using MyTracks = soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksDCA, aod::TracksCov,
                            aod::pidTPCFullEl, aod::pidTPCFullPi, aod::pidTPCFullKa, aod::pidTPCFullPr,
-                           aod::pidTOFFullEl, aod::pidTOFFullPi, aod::pidTOFFullKa, aod::pidTOFFullPr, 
+                           aod::pidTOFFullEl, aod::pidTOFFullPi, aod::pidTOFFullKa, aod::pidTOFFullPr,
                            aod::pidTOFbeta, aod::TOFSignal, aod::TOFEvTime>;
 using MyTrack = MyTracks::iterator;
 using MyTracksMC = soa::Join<MyTracks, aod::McTrackLabels, aod::mcTPCTuneOnData>;
@@ -71,19 +71,18 @@ using MyTrackMC = MyTracksMC::iterator;
 
 namespace o2::aod
 {
-  namespace pwgem::pm::recalculatedtofpid
-  {
-    DECLARE_SOA_COLUMN(BetaRecalculated, betaRecalculated, float);
-    DECLARE_SOA_COLUMN(TOFNSigmaElRecalculated, tofNSigmaElRecalculated, float);
-  } // namespace pwgem::dilepton::recalculatedtofpid
+namespace pwgem::pm::recalculatedtofpid
+{
+DECLARE_SOA_COLUMN(BetaRecalculated, betaRecalculated, float);
+DECLARE_SOA_COLUMN(TOFNSigmaElRecalculated, tofNSigmaElRecalculated, float);
+} // namespace pwgem::pm::recalculatedtofpid
 
-  DECLARE_SOA_TABLE(EMTOFNSigmas, "AOD", "EMTOFNSIGMA", // make std::map in your tasks later. // Don't store this table in the derived data.
-                    o2::aod::emprimaryelectron::CollisionId, o2::aod::emprimaryelectron::TrackId,
-                    o2::aod::pwgem::pm::recalculatedtofpid::BetaRecalculated, o2::aod::pwgem::pm::recalculatedtofpid::TOFNSigmaElRecalculated);
+DECLARE_SOA_TABLE(EMTOFNSigmas, "AOD", "EMTOFNSIGMA", // make std::map in your tasks later. // Don't store this table in the derived data.
+                  o2::aod::emprimaryelectron::CollisionId, o2::aod::emprimaryelectron::TrackId,
+                  o2::aod::pwgem::pm::recalculatedtofpid::BetaRecalculated, o2::aod::pwgem::pm::recalculatedtofpid::TOFNSigmaElRecalculated);
 
-  using EMTOFNSigma = EMTOFNSigmas::iterator;
+using EMTOFNSigma = EMTOFNSigmas::iterator;
 } // namespace o2::aod
-
 
 struct skimmerPrimaryElectronFromDalitzEE {
   SliceCache cache;
@@ -134,8 +133,8 @@ struct skimmerPrimaryElectronFromDalitzEE {
   Configurable<float> min_pin_for_pion_rejection{"min_pin_for_pion_rejection", 0.0, "pion rejection is applied above this pin"}; // this is used only in TOFreq
   Configurable<float> max_pin_for_pion_rejection{"max_pin_for_pion_rejection", 0.5, "pion rejection is applied below this pin"};
   Configurable<float> maxMee{"maxMee", 0.04, "max. mee to store dalitz ee pairs"};
-  Configurable<bool> fillLS{"fillLS", true, "flag to fill LS histograms for QA"}; 
-  Configurable<bool> fillWithPairs{"fillWithPairs", false, "flag to fill table based on pair information"}; 
+  Configurable<bool> fillLS{"fillLS", true, "flag to fill LS histograms for QA"};
+  Configurable<bool> fillWithPairs{"fillWithPairs", false, "flag to fill table based on pair information"};
   Configurable<bool> includeITSsa{"includeITSsa", false, "Flag to include ITSsa tracks"};
   Configurable<float> maxpt_itssa{"maxpt_itssa", 0.15, "max pt for ITSsa track"}; // o2-linter: disable=name/function-variable (renaming configs would mess up hyperloop)
   Configurable<float> maxMeanITSClusterSize{"maxMeanITSClusterSize", 16, "max <ITS cluster size> x cos(lambda)"};
@@ -143,8 +142,6 @@ struct skimmerPrimaryElectronFromDalitzEE {
   Configurable<float> intercept{"intercept", -0.0380, "intercept for m vs. phiv"};
   Configurable<bool> useTOFNSigmaDeltaBC{"useTOFNSigmaDeltaBC", false, "Flag to shift delta BC for TOF n sigma (only with TTCA)"};
   Configurable<bool> storeOnlyTrueElectronMC{"storeOnlyTrueElectronMC", false, "Flag to store only true electron in MC"};
-
-
 
   HistogramRegistry fRegistry{"output", {}, OutputObjHandlingPolicy::AnalysisObject, false, false};
   static constexpr std::array<std::string_view, 3> DileptonSigns = {"uls/", "lspp/", "lsmm/"};
@@ -404,7 +401,7 @@ struct skimmerPrimaryElectronFromDalitzEE {
       }
     }
 
-    o2::dataformats::DCA mDcaInfoCov;     //for Track association
+    o2::dataformats::DCA mDcaInfoCov; // for Track association
     mDcaInfoCov.set(999, 999, 999, 999, 999);
     auto trackParCov = getTrackParCov(track);
     trackParCov.setPID(o2::track::PID::Electron);
@@ -449,11 +446,11 @@ struct skimmerPrimaryElectronFromDalitzEE {
     if (maxMeanITSClusterSize < static_cast<float>(total_cluster_size) / static_cast<float>(nl) * std::cos(std::atan(trackParCov.getTgl()))) {
       return false;
     }
-    
+
     if ((track.hasITS() && !track.hasTPC() && !track.hasTRD() && !track.hasTOF()) && maxpt_itssa < track.pt()) {
       return false;
     }
-    
+
     // if ((track.hasITS() && !track.hasTPC() && !track.hasTRD() && !track.hasTOF()) && maxpt_itssa < track.pt()) {
     //   return false;
     // }
@@ -464,7 +461,7 @@ struct skimmerPrimaryElectronFromDalitzEE {
   template <o2::soa::is_iterator TCollision, o2::soa::is_iterator TTrack>
   bool isElectron(TCollision const& collision, TTrack const& track)
   {
-    if (includeITSsa && (track.hasITS() && !track.hasTPC() && !track.hasTRD() && !track.hasTOF()))[[unlikely]] {
+    if (includeITSsa && (track.hasITS() && !track.hasTPC() && !track.hasTRD() && !track.hasTOF())) [[unlikely]] {
       int total_cluster_size = 0, nl = 0;
       for (unsigned int layer = 0; layer < 7; layer++) {
         int cluster_size_per_layer = track.itsClsSizeInLayer(layer);
@@ -514,9 +511,10 @@ struct skimmerPrimaryElectronFromDalitzEE {
   }
 
   template <bool isMC, o2::soa::is_iterator TCollision, o2::soa::is_table TTracks>
-  void fillTrackInfo(TCollision const& collision, TTracks const& tracks){
-    
-    for(const auto & track : tracks){
+  void fillTrackInfo(TCollision const& collision, TTracks const& tracks)
+  {
+
+    for (const auto& track : tracks) {
       if (!checkTrack<isMC>(collision, track)) {
         continue;
       }
@@ -524,49 +522,48 @@ struct skimmerPrimaryElectronFromDalitzEE {
       if (!isElectron(collision, track)) {
         continue;
       }
-      
+
       fillTrackHistograms<isMC>(track);
       fillTrackTable<isMC>(collision, track);
     }
   }
-  
+
   template <bool isMC, int pairtype, o2::soa::is_iterator TCollision, o2::soa::is_table TTracks1, o2::soa::is_table TTracks2>
   void fillPairInfo(TCollision const& collision, TTracks1 const& tracks1, TTracks2 const& tracks2)
   {
     if constexpr (pairtype == 0) { // ULS
       for (const auto& [t1, t2] : combinations(CombinationsFullIndexPolicy(tracks1, tracks2))) {
-        
+
         if (!checkTrack<isMC>(collision, t1) || !checkTrack<isMC>(collision, t2)) {
           continue;
         }
-        
+
         if (!isElectron(collision, t1) || !isElectron(collision, t2)) {
           continue;
         }
-        
+
         ROOT::Math::PtEtaPhiMVector v1(t1.pt(), t1.eta(), t1.phi(), o2::constants::physics::MassElectron);
         ROOT::Math::PtEtaPhiMVector v2(t2.pt(), t2.eta(), t2.phi(), o2::constants::physics::MassElectron);
         ROOT::Math::PtEtaPhiMVector v12 = v1 + v2;
         float phiv = o2::aod::pwgem::dilepton::utils::pairutil::getPhivPair(t1.px(), t1.py(), t1.pz(), t2.px(), t2.py(), t2.pz(), t1.sign(), t2.sign(), dBz);
-        
-        
+
         fRegistry.fill(HIST("Pair/") + HIST(DileptonSigns[pairtype]) + HIST("hMvsPt"), v12.M(), v12.Pt());
         fRegistry.fill(HIST("Pair/") + HIST(DileptonSigns[pairtype]) + HIST("hMvsPhiV"), phiv, v12.M());
-        
+
         if (v12.M() > maxMee) { // don't store
           continue;
         }
-        
+
         fRegistry.fill(HIST("Pair/") + HIST(DileptonSigns[pairtype]) + HIST("hMCutMvsPt"), v12.M(), v12.Pt());
         fRegistry.fill(HIST("Pair/") + HIST(DileptonSigns[pairtype]) + HIST("hMCutMvsPhiV"), phiv, v12.M());
-        
+
         if (v12.M() < slope * phiv + intercept) {
           continue;
         }
-        
+
         fRegistry.fill(HIST("Pair/") + HIST(DileptonSigns[pairtype]) + HIST("hMPhiCutMvsPt"), v12.M(), v12.Pt());
         fRegistry.fill(HIST("Pair/") + HIST(DileptonSigns[pairtype]) + HIST("hMPhiCutMvsPhiV"), phiv, v12.M());
-        
+
         if (t1.sign() > 0) { // for positron
           if (std::find(acceptedPosTrackIds_per_collision.begin(), acceptedPosTrackIds_per_collision.end(), t1.globalIndex()) == acceptedPosTrackIds_per_collision.end()) {
             fillTrackHistograms<isMC>(t1);
@@ -578,7 +575,7 @@ struct skimmerPrimaryElectronFromDalitzEE {
             acceptedNegTrackIds_per_collision.emplace_back(t1.globalIndex());
           }
         }
-        
+
         if (t2.sign() > 0) { // for positron
           if (std::find(acceptedPosTrackIds_per_collision.begin(), acceptedPosTrackIds_per_collision.end(), t2.globalIndex()) == acceptedPosTrackIds_per_collision.end()) {
             fillTrackHistograms<isMC>(t2);
@@ -599,7 +596,7 @@ struct skimmerPrimaryElectronFromDalitzEE {
         if (!isElectron(collision, t1) || !isElectron(collision, t2)) {
           continue;
         }
-        
+
         ROOT::Math::PtEtaPhiMVector v1(t1.pt(), t1.eta(), t1.phi(), o2::constants::physics::MassElectron);
         ROOT::Math::PtEtaPhiMVector v2(t2.pt(), t2.eta(), t2.phi(), o2::constants::physics::MassElectron);
         ROOT::Math::PtEtaPhiMVector v12 = v1 + v2;
@@ -609,7 +606,7 @@ struct skimmerPrimaryElectronFromDalitzEE {
       } // end of LS pairing
     }
   }
-  
+
   template <bool isMC, o2::soa::is_iterator TTrack>
   void fillTrackHistograms(TTrack const& track)
   {
@@ -695,7 +692,7 @@ struct skimmerPrimaryElectronFromDalitzEE {
       emprimaryelectronsDeDxMC(track.mcTunedTPCSignal());
     }
   }
-  
+
   std::vector<int> acceptedPosTrackIds_per_collision;
   std::vector<int> acceptedNegTrackIds_per_collision;
   std::vector<int> acceptedTrackIds_per_collision;
@@ -717,7 +714,7 @@ struct skimmerPrimaryElectronFromDalitzEE {
   {
     initCCDB(bcs.iteratorAt(0));
     mTOFResponse->processSetup(bcs.iteratorAt(0));
-    
+
     for (const auto& track : tracks) {
       if (mapCollisionTime.find(track.collisionId()) == mapCollisionTime.end()) {
         // LOGF(info, "track.collisionId() = %d, track.tofEvTime() = %f, track.tofEvTimeErr() = %f", track.collisionId(), track.tofEvTime(), track.tofEvTimeErr());
@@ -739,15 +736,15 @@ struct skimmerPrimaryElectronFromDalitzEE {
       acceptedPosTrackIds_per_collision.reserve(posTracks_per_coll.size());
       acceptedNegTrackIds_per_collision.reserve(negTracks_per_coll.size());
 
-      if(!fillWithPairs){
+      if (!fillWithPairs) {
         fillTrackInfo<false>(collision, slicedTracks);
-      }else{
+      } else {
         fillPairInfo<false, 0>(collision, posTracks_per_coll, negTracks_per_coll); // ULS
         if (fillLS) {
           fillPairInfo<false, 1>(collision, posTracks_per_coll, posTracks_per_coll); // LS++
           fillPairInfo<false, 2>(collision, negTracks_per_coll, negTracks_per_coll); // LS--
         }
-  
+
         if ((v0photons_per_coll.size() >= 1 && !acceptedPosTrackIds_per_collision.empty() && !acceptedNegTrackIds_per_collision.empty()) || (acceptedPosTrackIds_per_collision.size() >= 2 && acceptedNegTrackIds_per_collision.size() >= 2)) {
           for (const auto& posId : acceptedPosTrackIds_per_collision) {
             const auto& pos = tracks.rawIteratorAt(posId);
@@ -833,7 +830,7 @@ struct skimmerPrimaryElectronFromDalitzEE {
   void processMC(MyCollisionsMC const& collisions, aod::McCollisions const&, aod::BCsWithTimestamps const& bcs, MyTracksMC const& tracks, aod::V0PhotonsKF const& v0photons, aod::TrackAssoc const& trackIndices)
   {
     uint64_t nCollisSel = 0;
-    uint64_t nNoMcColl= 0;
+    uint64_t nNoMcColl = 0;
     uint64_t nProcessedCollisions = 0;
     uint64_t nCheckTrack = 0;
 
@@ -869,15 +866,15 @@ struct skimmerPrimaryElectronFromDalitzEE {
       acceptedNegTrackIds_per_collision.reserve(negTracks_per_coll.size());
       acceptedTrackIds_per_collision.reserve(2 * (negTracks_per_coll.size()));
 
-      if(!fillWithPairs){
+      if (!fillWithPairs) {
         fillTrackInfo<true>(collision, slicedTracks);
-      }else{
+      } else {
         fillPairInfo<true, 0>(collision, posTracks_per_coll, negTracks_per_coll); // ULS
         if (fillLS) {
           fillPairInfo<true, 1>(collision, posTracks_per_coll, posTracks_per_coll); // LS++
           fillPairInfo<true, 2>(collision, negTracks_per_coll, negTracks_per_coll); // LS--
         }
-        if ((acceptedPosTrackIds_per_collision.empty() && acceptedNegTrackIds_per_collision.empty()) || (acceptedPosTrackIds_per_collision.size() >= 2 && acceptedNegTrackIds_per_collision.size() >= 2)) {   //v0photons_per_coll.size() >= 1 &&
+        if ((acceptedPosTrackIds_per_collision.empty() && acceptedNegTrackIds_per_collision.empty()) || (acceptedPosTrackIds_per_collision.size() >= 2 && acceptedNegTrackIds_per_collision.size() >= 2)) { // v0photons_per_coll.size() >= 1 &&
           for (const auto& posId : acceptedPosTrackIds_per_collision) {
             const auto& pos = tracks.rawIteratorAt(posId);
             fillTrackTable<true>(collision, pos);
@@ -887,7 +884,7 @@ struct skimmerPrimaryElectronFromDalitzEE {
             fillTrackTable<true>(collision, ele);
           }
         }
-      } //end of fill loop
+      } // end of fill loop
 
       acceptedPosTrackIds_per_collision.clear();
       acceptedNegTrackIds_per_collision.clear();
@@ -912,6 +909,5 @@ WorkflowSpec defineDataProcessing(ConfigContext const& context)
   o2::pid::tof::TOFResponseImpl::metadataInfo.initMetadata(context);
 
   return WorkflowSpec{
-    adaptAnalysisTask<skimmerPrimaryElectronFromDalitzEE>(context, TaskName{"skimmer-primary-electron-from-dalitzee"})
-  };
+    adaptAnalysisTask<skimmerPrimaryElectronFromDalitzEE>(context, TaskName{"skimmer-primary-electron-from-dalitzee"})};
 }
